@@ -1,23 +1,36 @@
 import { useState, useEffect } from 'react'
 import logoImg from './assets/logo.png'
 
+const WHATSAPP_URL = `https://wa.me/?text=${encodeURIComponent(
+  'Hola, quiero solicitar un análisis gratuito de captación para mi negocio.',
+)}`
+
 const NAV_LINKS = [
   { label: 'Inicio', href: '#home' },
   { label: 'Servicios', href: '#services' },
-  { label: 'Demos', href: '#demos' },
+  { label: 'Sectores', href: '#sectors' },
+  { label: 'Ejemplos', href: '#demos' },
   { label: 'Proceso', href: '#process' },
   { label: 'Contacto', href: '#contact' },
+]
+
+const HERO_BADGES = [
+  'Más contactos',
+  'Más reservas',
+  'Mejor conversión',
+  'Seguimiento comercial',
+  'ROI medible',
 ]
 
 const PROBLEMS = [
   {
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    title: 'Webs desactualizadas',
-    description: 'Tu web transmite una imagen anticuada y no convierte visitas en clientes cualificados.',
+    title: 'Visitas que se van',
+    description: 'Personas entran en tu web, miran un momento y se van sin llamar, reservar ni escribir.',
   },
   {
     icon: (
@@ -25,8 +38,35 @@ const PROBLEMS = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
     ),
-    title: 'Mensajes perdidos',
-    description: 'Las consultas llegan por WhatsApp, correo y formularios, y se pierden sin un sistema que las gestione.',
+    title: 'Respuestas tardías',
+    description: 'Clientes escriben por WhatsApp, correo o formulario y no reciben respuesta a tiempo.',
+  },
+  {
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+      </svg>
+    ),
+    title: 'Reservas y citas perdidas',
+    description: 'Solicitudes que se quedan en el aire por no tener un sistema claro de captación y seguimiento.',
+  },
+  {
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+      </svg>
+    ),
+    title: 'Reseñas sin aprovechar',
+    description: 'Opiniones positivas que no se convierten en confianza ni en más contactos comerciales.',
+  },
+  {
+    icon: (
+      <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18L9 11.25l4.306 4.307a11.95 11.95 0 015.814-5.519l2.74-1.22m0 0l-5.94-2.28m5.94 2.28l-2.28 5.941" />
+      </svg>
+    ),
+    title: 'Tráfico sin medición',
+    description: 'Campañas y publicaciones generan visitas, pero no contactos medibles ni datos claros.',
   },
   {
     icon: (
@@ -34,75 +74,135 @@ const PROBLEMS = [
         <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     ),
-    title: 'Sin seguimiento',
-    description: 'Los contactos interesados se enfrían porque nadie responde a tiempo ni hace un seguimiento adecuado.',
+    title: 'Leads sin seguimiento',
+    description: 'Interesados que se enfrían porque nadie registra, clasifica ni hace un seguimiento comercial.',
   },
   {
     icon: (
       <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-        <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
       </svg>
     ),
-    title: 'Procesos manuales',
-    description: 'Tu equipo repite las mismas tareas cada día en lugar de centrarse en clientes y crecimiento.',
+    title: 'Canales sin claridad',
+    description: 'Tienes tráfico, pero no sabes qué canal genera clientes reales ni dónde invertir mejor.',
   },
 ]
 
 const SERVICES = [
   {
-    tag: 'Web',
-    title: 'Webs profesionales',
-    description: 'Webs rápidas y modernas, diseñadas para representar tu marca y convertir tráfico en conversaciones.',
+    tag: 'Captación',
+    title: 'Sistemas de captación',
+    description:
+      'Webs y páginas de aterrizaje diseñadas para transformar visitas en llamadas, reservas, formularios y mensajes de WhatsApp.',
     accent: 'cyan',
   },
   {
-    tag: 'Leads',
-    title: 'Web + captación de leads',
-    description: 'Formularios integrados, conexión con CRM y avisos instantáneos para que ninguna consulta se escape.',
+    tag: 'Conversión',
+    title: 'Conversión y seguimiento',
+    description:
+      'Estructuramos formularios, CTAs y flujos de contacto para que cada cliente potencial quede registrado y reciba seguimiento.',
     accent: 'orange',
   },
   {
-    tag: 'Auto',
-    title: 'Automatizaciones inteligentes',
-    description: 'Flujos que gestionan seguimientos, recordatorios y sincronización de datos, sin trabajo manual.',
+    tag: 'Comercial',
+    title: 'Automatización comercial',
+    description:
+      'Automatizamos respuestas iniciales, clasificación de leads y avisos internos para no perder oportunidades por responder tarde.',
     accent: 'cyan',
   },
   {
-    tag: 'AI',
-    title: 'Sistemas empresariales con IA',
-    description: 'Asistentes inteligentes y flujos automatizados adaptados a cómo funciona realmente tu negocio.',
+    tag: 'Confianza',
+    title: 'Reputación y confianza',
+    description:
+      'Analizamos reseñas, destacamos puntos fuertes y ayudamos a convertir la confianza online en más contactos.',
     accent: 'orange',
+  },
+  {
+    tag: 'Datos',
+    title: 'Dashboards de oportunidades',
+    description:
+      'Paneles sencillos para ver de dónde vienen los leads, cuántos contactan y qué canales funcionan mejor.',
+    accent: 'cyan',
+  },
+  {
+    tag: 'Optimización',
+    title: 'Optimización de presencia digital',
+    description:
+      'Revisamos cómo se presenta tu negocio online y proponemos mejoras concretas para aumentar llamadas, reservas y solicitudes.',
+    accent: 'orange',
+  },
+]
+
+const SECTORS = [
+  {
+    title: 'Restaurantes',
+    description:
+      'Cartas online, reservas, WhatsApp, Google Maps y páginas diseñadas para convertir visitas en mesas ocupadas.',
+    result: 'Más reservas y consultas',
+  },
+  {
+    title: 'Clínicas dentales y estéticas',
+    description:
+      'Solicitudes de cita, formularios claros, seguimiento de pacientes potenciales y confianza online.',
+    result: 'Más citas y solicitudes',
+  },
+  {
+    title: 'Gimnasios y entrenadores',
+    description:
+      'Captación de leads para bonos, planes, clases y membresías con seguimiento comercial claro.',
+    result: 'Más altas y pruebas',
+  },
+  {
+    title: 'Academias',
+    description:
+      'Formularios para nuevos alumnos, información clara y seguimiento de interesados sin perder contactos.',
+    result: 'Más matrículas potenciales',
+  },
+  {
+    title: 'Inmobiliarias',
+    description:
+      'Captación y clasificación de compradores, vendedores e interesados con priorización comercial.',
+    result: 'Más oportunidades cualificadas',
+  },
+  {
+    title: 'Servicios locales',
+    description:
+      'Llamadas, presupuestos y solicitudes desde la web con respuesta rápida y registro de cada contacto.',
+    result: 'Más presupuestos y llamadas',
   },
 ]
 
 const DEMOS = [
   {
-    industry: 'Clínica dental',
-    title: 'Formulario de captación + email automático',
-    description: 'Formulario de consulta con confirmación instantánea por correo y avisos al equipo en cada envío.',
-    tags: ['Captación', 'Email automático', 'Avisos al equipo'],
-    gradient: 'from-cyan-500/20 to-cyan-900/10',
-  },
-  {
-    industry: 'Gimnasio',
-    title: 'Panel de gestión de leads',
-    description: 'Panel central para gestionar solicitudes de prueba, asignar seguimientos y monitorizar conversiones.',
-    tags: ['Panel CRM', 'Pipeline', 'Analítica'],
+    industry: 'Restauración',
+    title: 'Web orientada a reservas',
+    description:
+      'Carta, menú del día, WhatsApp, ubicación y CTAs claros para convertir visitas móviles en clientes reales.',
+    tags: ['Reservas', 'WhatsApp', 'Conversión móvil'],
     gradient: 'from-orange-500/20 to-orange-900/10',
   },
   {
-    industry: 'Servicio técnico',
-    title: 'Sistema de solicitud de presupuestos',
-    description: 'Formulario estructurado para datos del dispositivo, fotos y urgencia, enviado directamente a los técnicos.',
-    tags: ['Flujo de presupuesto', 'Subida de archivos', 'Enrutado'],
+    industry: 'Clínica dental',
+    title: 'Formularios inteligentes',
+    description:
+      'Captación y clasificación de pacientes potenciales para priorizar los contactos con mayor intención.',
+    tags: ['Captación', 'Clasificación', 'Seguimiento'],
+    gradient: 'from-cyan-500/20 to-cyan-900/10',
+  },
+  {
+    industry: 'Multi-sector',
+    title: 'Dashboard de leads',
+    description:
+      'Panel para ver contactos, estado de cada oportunidad, canal de origen y seguimiento comercial.',
+    tags: ['Panel comercial', 'Origen de leads', 'Pipeline'],
     gradient: 'from-cyan-500/20 to-blue-900/10',
   },
   {
-    industry: 'Centro de belleza',
-    title: 'Landing + reservas por WhatsApp',
-    description: 'Presentación de servicios con reserva por WhatsApp en un clic y confirmaciones automáticas.',
-    tags: ['Landing page', 'WhatsApp', 'Reservas'],
+    industry: 'Negocios locales',
+    title: 'Analizador de reseñas',
+    description:
+      'Sistema para detectar puntos fuertes, problemas recurrentes y oportunidades en tu reputación online.',
+    tags: ['Reseñas', 'Confianza', 'Mejora continua'],
     gradient: 'from-orange-500/20 to-rose-900/10',
   },
 ]
@@ -110,31 +210,59 @@ const DEMOS = [
 const PROCESS_STEPS = [
   {
     step: '01',
-    title: 'Analizamos tu negocio',
-    description: 'Mapeamos tu flujo actual, cuellos de botella y objetivos de crecimiento antes de escribir una sola línea de código.',
+    title: 'Analizamos tu captación actual',
+    description:
+      'Revisamos web, canales, formularios, tiempos de respuesta y puntos donde se pierden oportunidades comerciales.',
   },
   {
     step: '02',
-    title: 'Diseñamos la solución',
-    description: 'Una arquitectura clara — web, puntos de captación, automatizaciones e integraciones — construida en torno a tu operativa.',
+    title: 'Diseñamos el sistema comercial',
+    description:
+      'Definimos captación, conversión, seguimiento y métricas. La IA y la automatización entran como herramientas al servicio del resultado.',
   },
   {
     step: '03',
-    title: 'Construimos con rapidez',
-    description: 'Sprints enfocados con progreso visible. Ves prototipos funcionando pronto, no meses de silencio.',
+    title: 'Lo implementamos con rapidez',
+    description:
+      'Entregas visibles en poco tiempo: web, formularios, avisos, paneles y flujos listos para generar contactos.',
   },
   {
     step: '04',
-    title: 'Lanzamos y mejoramos',
-    description: 'Publicamos con confianza y luego iteramos según datos reales y los comentarios de tu equipo y clientes.',
+    title: 'Medimos y mejoramos',
+    description:
+      'Seguimos conversión, leads y canales para ajustar lo que funciona y recuperar oportunidades que antes se perdían.',
   },
+]
+
+const BEFORE_ITEMS = [
+  'Web informativa sin llamadas claras a la acción.',
+  'Mensajes dispersos entre WhatsApp, correo y redes.',
+  'Sin seguimiento de interesados.',
+  'Sin saber qué genera clientes reales.',
+  'Reseñas positivas desaprovechadas.',
+]
+
+const AFTER_ITEMS = [
+  'Web orientada a contacto, reservas y solicitudes.',
+  'WhatsApp, formularios y llamadas bien integrados.',
+  'Leads registrados, clasificados y con seguimiento.',
+  'Métricas para saber qué canal convierte mejor.',
+  'Confianza online convertida en más oportunidades.',
+]
+
+const GOAL_OPTIONS = [
+  'Captar más clientes',
+  'Conseguir más reservas',
+  'Mejorar seguimiento de leads',
+  'Automatizar respuestas comerciales',
+  'Mejorar reputación online',
 ]
 
 function Logo({ className = '' }) {
   return (
     <img
       src={logoImg}
-      alt="ProcessAI Studio"
+      alt="ProcessAI Studio — Sistemas digitales para captar más clientes"
       className={`block w-auto shrink-0 object-contain ${className}`}
     />
   )
@@ -165,7 +293,7 @@ function Navbar() {
           <Logo className="h-[38px] transition-opacity duration-200 group-hover:opacity-90 md:h-[46px]" />
         </a>
 
-        <ul className="hidden items-center gap-8 md:flex">
+        <ul className="hidden items-center gap-6 lg:flex xl:gap-8">
           {NAV_LINKS.map((link) => (
             <li key={link.href}>
               <a
@@ -182,7 +310,7 @@ function Navbar() {
           href="#contact"
           className="btn-primary hidden rounded-lg px-5 py-2.5 text-sm font-semibold text-navy-950 md:inline-flex"
         >
-          Solicitar propuesta
+          Solicitar análisis
         </a>
 
         <button
@@ -224,7 +352,7 @@ function Navbar() {
                 onClick={closeMenu}
                 className="btn-primary block rounded-lg px-5 py-2.5 text-center text-sm font-semibold text-navy-950"
               >
-                Solicitar propuesta
+                Solicitar análisis
               </a>
             </li>
           </ul>
@@ -241,31 +369,41 @@ function Hero() {
       <div className="glow-orb animate-pulse-glow top-20 right-0 h-80 w-80 bg-orange-500/15" style={{ animationDelay: '2s' }} />
 
       <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl text-center">
+        <div className="mx-auto max-w-4xl text-center">
           <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-cyan-500/20 bg-cyan-500/5 px-4 py-1.5">
             <span className="h-1.5 w-1.5 rounded-full bg-cyan-glow animate-pulse" />
             <span className="text-xs font-medium tracking-wide text-cyan-glow/90">
-              Estudio de sistemas digitales
+              Captación · Conversión · Seguimiento comercial
             </span>
           </div>
 
           <h1 className="font-display text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl lg:text-6xl">
-            Crea los sistemas que{' '}
-            <span className="text-gradient">captan clientes</span>{' '}
-            e impulsan tu negocio
+            Convierte más visitas en clientes con{' '}
+            <span className="text-gradient">sistemas digitales</span> inteligentes
           </h1>
 
-          <p className="mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-slate-400 sm:text-xl">
-            ProcessAI Studio crea webs profesionales, sistemas de captación de leads y automatizaciones inteligentes
-            para negocios que quieren crecer, sin el caos de seguimientos manuales y herramientas dispersas.
+          <p className="mx-auto mt-6 max-w-3xl text-lg leading-relaxed text-slate-400 sm:text-xl">
+            Creamos webs, formularios, automatizaciones y sistemas de seguimiento diseñados para que negocios
+            locales y empresas capten más clientes, respondan antes y no pierdan oportunidades comerciales.
           </p>
+
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
+            {HERO_BADGES.map((badge) => (
+              <span
+                key={badge}
+                className="rounded-full border border-cyan-500/15 bg-navy-800/60 px-3 py-1 text-xs font-medium text-slate-300"
+              >
+                {badge}
+              </span>
+            ))}
+          </div>
 
           <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
             <a
               href="#contact"
               className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-navy-950 sm:w-auto"
             >
-              Solicitar propuesta
+              Quiero captar más clientes
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
               </svg>
@@ -274,7 +412,7 @@ function Hero() {
               href="#demos"
               className="btn-secondary inline-flex w-full items-center justify-center rounded-xl px-8 py-3.5 text-sm font-semibold text-slate-200 sm:w-auto"
             >
-              Ver proyectos demo
+              Ver ejemplos
             </a>
           </div>
         </div>
@@ -286,13 +424,13 @@ function Hero() {
                 <span className="h-3 w-3 rounded-full bg-red-500/80" />
                 <span className="h-3 w-3 rounded-full bg-yellow-500/80" />
                 <span className="h-3 w-3 rounded-full bg-green-500/80" />
-                <span className="ml-3 font-mono text-xs text-slate-500">processai.systems/dashboard</span>
+                <span className="ml-3 font-mono text-xs text-slate-500">panel.processai.studio/leads</span>
               </div>
               <div className="grid gap-4 sm:grid-cols-3">
                 {[
-                  { label: 'Leads hoy', value: '24', change: '+18%' },
-                  { label: 'Respuestas automáticas', value: '156', change: '100%' },
-                  { label: 'Tasa de conversión', value: '34%', change: '+12%' },
+                  { label: 'Contactos este mes', value: '47', change: '+23%' },
+                  { label: 'Reservas / solicitudes', value: '18', change: '+31%' },
+                  { label: 'Conversión web', value: '2,8%', change: '+1,2 pp' },
                 ].map((stat) => (
                   <div key={stat.label} className="rounded-lg border border-cyan-500/10 bg-navy-800/50 p-4">
                     <p className="text-xs text-slate-500">{stat.label}</p>
@@ -309,22 +447,38 @@ function Hero() {
   )
 }
 
+function NarrativeSection() {
+  return (
+    <section className="relative border-y border-cyan-500/10 bg-navy-900/30 py-16 lg:py-20">
+      <div className="mx-auto max-w-4xl px-6 text-center lg:px-8">
+        <p className="font-display text-2xl font-semibold leading-snug text-white sm:text-3xl">
+          No hacemos webs bonitas sin más.{' '}
+          <span className="text-gradient">Creamos sistemas digitales</span> pensados para generar oportunidades comerciales.
+        </p>
+        <p className="mx-auto mt-4 max-w-2xl text-slate-400">
+          Combinamos web, datos, IA y automatización para construir captación, conversión y seguimiento comercial
+          medible — sin parecer una agencia genérica de marketing.
+        </p>
+      </div>
+    </section>
+  )
+}
+
 function ProblemSection() {
   return (
     <section className="relative py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="mx-auto max-w-2xl text-center">
+        <div className="mx-auto max-w-3xl text-center">
           <p className="section-label">El problema</p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            El crecimiento se frena cuando los sistemas no acompañan
+            Tu negocio puede estar perdiendo clientes sin darse cuenta
           </h2>
           <p className="mt-4 text-slate-400">
-            La mayoría de negocios no necesitan otra web genérica. Necesitan sistemas conectados que capturen,
-            respondan y conviertan, de forma automática.
+            No siempre falta tráfico. A veces falta convertir, responder a tiempo y medir qué canal trae clientes reales.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {PROBLEMS.map((item) => (
             <article key={item.title} className="card-glass group rounded-2xl p-6">
               <div className="mb-4 inline-flex rounded-xl bg-orange-500/10 p-3 text-orange-glow transition-colors group-hover:bg-cyan-500/10 group-hover:text-cyan-glow">
@@ -334,6 +488,155 @@ function ProblemSection() {
               <p className="mt-2 text-sm leading-relaxed text-slate-400">{item.description}</p>
             </article>
           ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function ROISection() {
+  const [visits, setVisits] = useState(300)
+  const [currentRate, setCurrentRate] = useState(1)
+  const [targetRate, setTargetRate] = useState(3)
+
+  const currentLeads = Math.round((visits * currentRate) / 100)
+  const targetLeads = Math.round((visits * targetRate) / 100)
+  const extraLeads = Math.max(targetLeads - currentLeads, 0)
+
+  return (
+    <section id="roi" className="relative py-24 lg:py-32">
+      <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-500/20 to-transparent" />
+
+      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div>
+            <p className="section-label">Conversión y retorno</p>
+            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
+              El crecimiento no depende solo de tener más visitas, sino de convertir mejor
+            </h2>
+            <p className="mt-4 text-slate-400">
+              Si tu web recibe 300 visitas al mes y solo 3 personas contactan, tu conversión es del 1%. Mejorar
+              mensajes, CTAs, WhatsApp, formularios y seguimiento del 1% al 3% puede triplicar oportunidades
+              comerciales sin pagar más tráfico.
+            </p>
+          </div>
+
+          <div className="card-glass rounded-2xl p-6 sm:p-8">
+            <p className="mb-6 text-sm font-medium text-cyan-glow">Calculadora de oportunidades</p>
+
+            <div className="space-y-5">
+              <div>
+                <label htmlFor="roi-visits" className="form-label">
+                  Visitas mensuales
+                </label>
+                <input
+                  id="roi-visits"
+                  type="number"
+                  min={50}
+                  max={10000}
+                  value={visits}
+                  onChange={(e) => setVisits(Number(e.target.value) || 0)}
+                  className="form-input"
+                />
+              </div>
+
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="roi-current" className="form-label">
+                    Conversión actual (%)
+                  </label>
+                  <input
+                    id="roi-current"
+                    type="number"
+                    min={0.1}
+                    max={20}
+                    step={0.1}
+                    value={currentRate}
+                    onChange={(e) => setCurrentRate(Number(e.target.value) || 0)}
+                    className="form-input"
+                  />
+                </div>
+                <div>
+                  <label htmlFor="roi-target" className="form-label">
+                    Conversión objetivo (%)
+                  </label>
+                  <input
+                    id="roi-target"
+                    type="number"
+                    min={0.1}
+                    max={20}
+                    step={0.1}
+                    value={targetRate}
+                    onChange={(e) => setTargetRate(Number(e.target.value) || 0)}
+                    className="form-input"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-8 grid gap-4 sm:grid-cols-3">
+              <div className="rounded-xl border border-cyan-500/10 bg-navy-800/50 p-4 text-center">
+                <p className="text-xs text-slate-500">Leads actuales</p>
+                <p className="mt-1 font-display text-3xl font-bold text-white">{currentLeads}</p>
+                <p className="mt-1 text-xs text-slate-500">{currentRate}% conversión</p>
+              </div>
+              <div className="rounded-xl border border-cyan-500/10 bg-navy-800/50 p-4 text-center">
+                <p className="text-xs text-slate-500">Leads potenciales</p>
+                <p className="mt-1 font-display text-3xl font-bold text-cyan-glow">{targetLeads}</p>
+                <p className="mt-1 text-xs text-slate-500">{targetRate}% objetivo</p>
+              </div>
+              <div className="rounded-xl border border-orange-500/20 bg-orange-500/5 p-4 text-center sm:col-span-1">
+                <p className="text-xs text-slate-500">Oportunidades extra</p>
+                <p className="mt-1 font-display text-3xl font-bold text-orange-glow">+{extraLeads}</p>
+                <p className="mt-1 text-xs text-slate-500">al mes</p>
+              </div>
+            </div>
+
+            <p className="mt-4 text-center text-xs text-slate-500">
+              Ejemplo orientativo. Los resultados dependen de tu sector, oferta y canal de tráfico.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function BeforeAfterSection() {
+  return (
+    <section className="relative py-24 lg:py-32">
+      <div className="mx-auto max-w-6xl px-6 lg:px-8">
+        <div className="mx-auto max-w-2xl text-center">
+          <p className="section-label">Antes / Después</p>
+          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            De una presencia digital pasiva a un sistema de captación
+          </h2>
+        </div>
+
+        <div className="mt-16 grid gap-6 lg:grid-cols-2">
+          <article className="card-glass rounded-2xl border-orange-500/10 p-8">
+            <p className="section-label text-orange-glow">Antes</p>
+            <ul className="mt-6 space-y-4">
+              {BEFORE_ITEMS.map((item) => (
+                <li key={item} className="flex gap-3 text-sm text-slate-400">
+                  <span className="mt-0.5 text-orange-glow">✕</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </article>
+
+          <article className="card-glass rounded-2xl border-cyan-500/15 p-8">
+            <p className="section-label">Después</p>
+            <ul className="mt-6 space-y-4">
+              {AFTER_ITEMS.map((item) => (
+                <li key={item} className="flex gap-3 text-sm text-slate-300">
+                  <span className="mt-0.5 text-cyan-glow">✓</span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </article>
         </div>
       </div>
     </section>
@@ -350,15 +653,15 @@ function ServicesSection() {
           <div className="max-w-xl">
             <p className="section-label">Servicios</p>
             <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              Todo lo que necesitas para captar, convertir y automatizar
+              Sistemas para captar, convertir y no perder oportunidades
             </h2>
           </div>
           <p className="max-w-md text-slate-400 lg:text-right">
-            Desde una presencia web cuidada hasta flujos completos con IA, construidos como un sistema coherente, no como herramientas sueltas.
+            IA, automatización y datos al servicio de un objetivo claro: más contactos, más reservas y crecimiento medible.
           </p>
         </div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-2">
+        <div className="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
           {SERVICES.map((service) => (
             <article
               key={service.title}
@@ -378,21 +681,49 @@ function ServicesSection() {
               >
                 {service.tag}
               </span>
-              <h3 className="relative mt-4 font-display text-xl font-semibold text-white">
-                {service.title}
-              </h3>
-              <p className="relative mt-3 text-sm leading-relaxed text-slate-400">
-                {service.description}
-              </p>
+              <h3 className="relative mt-4 font-display text-xl font-semibold text-white">{service.title}</h3>
+              <p className="relative mt-3 text-sm leading-relaxed text-slate-400">{service.description}</p>
               <a
                 href="#contact"
                 className="relative mt-6 inline-flex items-center gap-1.5 text-sm font-medium text-cyan-glow transition-colors hover:text-white"
               >
-                Hablar de este servicio
+                Solicitar análisis
                 <svg className="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </a>
+            </article>
+          ))}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+function SectorsSection() {
+  return (
+    <section id="sectors" className="relative py-24 lg:py-32">
+      <div className="glow-orb -right-20 top-1/3 h-64 w-64 bg-orange-500/10" />
+
+      <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
+        <div className="mx-auto max-w-3xl text-center">
+          <p className="section-label">Sectores</p>
+          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Soluciones para negocios que dependen de captar clientes
+          </h2>
+          <p className="mt-4 text-slate-400">
+            Cada sector tiene sus canales y sus fricciones. Adaptamos el sistema digital al resultado comercial que necesitas.
+          </p>
+        </div>
+
+        <div className="mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {SECTORS.map((sector) => (
+            <article key={sector.title} className="card-glass rounded-2xl p-6">
+              <h3 className="font-display text-lg font-semibold text-white">{sector.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-slate-400">{sector.description}</p>
+              <p className="mt-4 inline-flex rounded-full border border-cyan-500/15 bg-cyan-500/5 px-3 py-1 text-xs font-medium text-cyan-glow">
+                {sector.result}
+              </p>
             </article>
           ))}
         </div>
@@ -408,25 +739,20 @@ function DemosSection() {
 
       <div className="relative mx-auto max-w-6xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl text-center">
-          <p className="section-label">Demos</p>
+          <p className="section-label">Ejemplos</p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Sistemas reales para sectores reales
+            Herramientas reales para captar y convertir mejor
           </h2>
           <p className="mt-4 text-slate-400">
-            Cada negocio es distinto. Así adaptamos los sistemas digitales a cada sector.
+            Proyectos y demos orientados a generar contactos, reservas, solicitudes y seguimiento comercial.
           </p>
         </div>
 
         <div className="mt-16 grid gap-6 md:grid-cols-2">
           {DEMOS.map((demo) => (
-            <article
-              key={demo.title}
-              className="card-glass group overflow-hidden rounded-2xl"
-            >
+            <article key={demo.title} className="card-glass group overflow-hidden rounded-2xl">
               <div className={`bg-gradient-to-br ${demo.gradient} px-8 pt-8 pb-6`}>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
-                  {demo.industry}
-                </p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">{demo.industry}</p>
                 <h3 className="mt-2 font-display text-xl font-semibold text-white">{demo.title}</h3>
               </div>
               <div className="px-8 py-6">
@@ -459,7 +785,7 @@ function ProcessSection() {
         <div className="mx-auto max-w-2xl text-center">
           <p className="section-label">Proceso</p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            De la idea al sistema en producción en semanas, no meses
+            De diagnóstico a sistema comercial en semanas, no meses
           </h2>
         </div>
 
@@ -499,9 +825,13 @@ function ProcessSection() {
 function CTASection() {
   const [form, setForm] = useState({
     name: '',
+    business: '',
+    sector: '',
+    website: '',
+    goal: GOAL_OPTIONS[0],
     phone: '',
     email: '',
-    subject: '',
+    message: '',
   })
   const [status, setStatus] = useState('idle')
 
@@ -514,22 +844,22 @@ function CTASection() {
     event.preventDefault()
     setStatus('sending')
 
+    const bodyLines = [
+      `Negocio: ${form.business.trim() || 'No indicado'}`,
+      `Sector: ${form.sector.trim() || 'No indicado'}`,
+      `Web actual: ${form.website.trim() || 'No indicada'}`,
+      `Objetivo principal: ${form.goal}`,
+      `Teléfono: ${form.phone.trim()}`,
+      '',
+      form.message.trim() || 'Sin mensaje adicional.',
+    ]
+
     const formData = new FormData()
     formData.append('name', form.name.trim())
     formData.append('email', form.email.trim())
     formData.append('phone', form.phone.trim())
-    formData.append(
-      'message',
-      form.subject.trim()
-        ? `Asunto: ${form.subject.trim()}\n\nTeléfono: ${form.phone.trim()}`
-        : `Teléfono: ${form.phone.trim()}`,
-    )
-    formData.append(
-      '_subject',
-      form.subject.trim()
-        ? `[ProcessAI Studio] ${form.subject.trim()}`
-        : '[ProcessAI Studio] Nueva consulta desde la web',
-    )
+    formData.append('message', bodyLines.join('\n'))
+    formData.append('_subject', `[ProcessAI Studio] Solicitud de análisis — ${form.business.trim() || form.name.trim()}`)
     formData.append('_captcha', 'false')
     formData.append('_template', 'table')
 
@@ -544,7 +874,16 @@ function CTASection() {
 
       if (response.ok && data.success) {
         setStatus('success')
-        setForm({ name: '', phone: '', email: '', subject: '' })
+        setForm({
+          name: '',
+          business: '',
+          sector: '',
+          website: '',
+          goal: GOAL_OPTIONS[0],
+          phone: '',
+          email: '',
+          message: '',
+        })
         return
       }
 
@@ -562,19 +901,36 @@ function CTASection() {
           <div className="glow-orb -bottom-20 -right-20 h-64 w-64 bg-orange-500/15" />
 
           <div className="relative mx-auto max-w-3xl text-center">
-            <p className="section-label">Hablemos</p>
+            <p className="section-label">Contacto</p>
             <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-              ¿Quieres un sistema diseñado en torno a{' '}
-              <span className="text-gradient">tu negocio</span>?
+              ¿Quieres saber cuántas oportunidades está perdiendo tu negocio?
             </h2>
             <p className="mx-auto mt-5 max-w-xl text-slate-400">
-              Cuéntanos tus objetivos y prepararemos una propuesta personalizada: sin plantillas,
-              sin paquetes cerrados, solo la solución que encaja contigo.
+              Revisamos tu presencia digital y te proponemos un sistema sencillo para captar, convertir y gestionar
+              más clientes. Sin compromiso: te diremos qué mejoraríamos para convertir más visitas en contactos reales.
             </p>
 
+            <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row">
+              <a
+                href="#contact-form"
+                className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-navy-950 sm:w-auto"
+              >
+                Solicitar análisis gratuito
+              </a>
+              <a
+                href={WHATSAPP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-slate-200 sm:w-auto"
+              >
+                Hablar por WhatsApp
+              </a>
+            </div>
+
             <form
+              id="contact-form"
               onSubmit={handleSubmit}
-              className="card-glass mx-auto mt-10 max-w-2xl rounded-2xl border border-cyan-500/10 p-6 text-left sm:p-8"
+              className="card-glass mx-auto mt-10 max-w-2xl scroll-mt-28 rounded-2xl border border-cyan-500/10 p-6 text-left sm:p-8"
             >
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
@@ -595,6 +951,73 @@ function CTASection() {
                 </div>
 
                 <div>
+                  <label htmlFor="contact-business" className="form-label">
+                    Empresa / negocio <span className="form-required">*</span>
+                  </label>
+                  <input
+                    id="contact-business"
+                    name="business"
+                    type="text"
+                    required
+                    value={form.business}
+                    onChange={handleChange}
+                    placeholder="Nombre de tu negocio"
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="contact-sector" className="form-label">
+                    Sector <span className="form-required">*</span>
+                  </label>
+                  <input
+                    id="contact-sector"
+                    name="sector"
+                    type="text"
+                    required
+                    value={form.sector}
+                    onChange={handleChange}
+                    placeholder="Restaurante, clínica, gimnasio…"
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="contact-website" className="form-label">
+                    Web actual <span className="text-slate-500">(opcional)</span>
+                  </label>
+                  <input
+                    id="contact-website"
+                    name="website"
+                    type="url"
+                    value={form.website}
+                    onChange={handleChange}
+                    placeholder="https://tunegocio.com"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="contact-goal" className="form-label">
+                    Objetivo principal <span className="form-required">*</span>
+                  </label>
+                  <select
+                    id="contact-goal"
+                    name="goal"
+                    required
+                    value={form.goal}
+                    onChange={handleChange}
+                    className="form-input"
+                  >
+                    {GOAL_OPTIONS.map((goal) => (
+                      <option key={goal} value={goal}>
+                        {goal}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
                   <label htmlFor="contact-phone" className="form-label">
                     Teléfono <span className="form-required">*</span>
                   </label>
@@ -611,7 +1034,7 @@ function CTASection() {
                   />
                 </div>
 
-                <div className="sm:col-span-2">
+                <div>
                   <label htmlFor="contact-email" className="form-label">
                     Correo electrónico <span className="form-required">*</span>
                   </label>
@@ -629,16 +1052,16 @@ function CTASection() {
                 </div>
 
                 <div className="sm:col-span-2">
-                  <label htmlFor="contact-subject" className="form-label">
-                    Asunto <span className="text-slate-500">(opcional)</span>
+                  <label htmlFor="contact-message" className="form-label">
+                    Mensaje <span className="text-slate-500">(opcional)</span>
                   </label>
                   <textarea
-                    id="contact-subject"
-                    name="subject"
+                    id="contact-message"
+                    name="message"
                     rows={4}
-                    value={form.subject}
+                    value={form.message}
                     onChange={handleChange}
-                    placeholder="¿En qué podemos ayudarte?"
+                    placeholder="Cuéntanos brevemente tu situación actual o qué te gustaría mejorar."
                     className="form-input form-textarea min-h-[120px] resize-y"
                   />
                 </div>
@@ -649,7 +1072,7 @@ function CTASection() {
                 disabled={status === 'sending'}
                 className="btn-primary mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-navy-950 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                {status === 'sending' ? 'Enviando…' : 'Enviar solicitud'}
+                {status === 'sending' ? 'Enviando…' : 'Solicitar análisis'}
                 {status !== 'sending' && (
                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                     <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
@@ -659,13 +1082,13 @@ function CTASection() {
 
               {status === 'success' && (
                 <p className="mt-4 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-center text-sm text-cyan-glow">
-                  ¡Mensaje enviado! Te responderemos en breve.
+                  ¡Solicitud enviada! Te contactaremos en breve con un análisis inicial.
                 </p>
               )}
 
               {status === 'error' && (
                 <p className="mt-4 rounded-lg border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-center text-sm text-orange-glow">
-                  No se pudo enviar el mensaje. Inténtalo de nuevo o contáctanos directamente abajo.
+                  No se pudo enviar la solicitud. Inténtalo de nuevo o contáctanos directamente abajo.
                 </p>
               )}
             </form>
@@ -742,8 +1165,12 @@ function App() {
       <Navbar />
       <main>
         <Hero />
+        <NarrativeSection />
         <ProblemSection />
+        <ROISection />
+        <BeforeAfterSection />
         <ServicesSection />
+        <SectorsSection />
         <DemosSection />
         <ProcessSection />
         <CTASection />

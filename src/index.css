@@ -155,6 +155,15 @@ body {
   line-height: 1.5;
 }
 
+select.form-input {
+  cursor: pointer;
+}
+
+select.form-input option {
+  background-color: var(--color-navy-800);
+  color: #e2e8f0;
+}
+
 .form-label {
   display: block;
   margin-bottom: 0.5rem;
