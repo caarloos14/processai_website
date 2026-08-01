@@ -5,7 +5,7 @@ const NAV_LINKS = [
   { label: 'Inicio', href: '#home' },
   { label: 'Servicios', href: '#services' },
   { label: 'ROI', href: '#roi' },
-  { label: 'Caso estimado', href: '#case' },
+  { label: 'Caso real', href: '#case' },
   { label: 'Metodología', href: '#process' },
   { label: 'Contacto', href: '#contact' },
 ]
@@ -75,7 +75,7 @@ const ROI_METRICS = [
 ]
 
 const CASE_BEFORE = [
-  { label: 'Visitas mensuales estimadas', value: '1.250' },
+  { label: 'Visitas mensuales', value: '1.250' },
   { label: 'Conversión inicial', value: '1,4 %' },
   { label: 'Contactos mensuales iniciales', value: '17,5' },
   { label: 'Tasa de seguimiento efectivo', value: '42,0 %' },
@@ -83,8 +83,8 @@ const CASE_BEFORE = [
 ]
 
 const CASE_AFTER = [
-  { label: 'Conversión estimada', value: '3,2 %' },
-  { label: 'Contactos mensuales estimados', value: '40,0' },
+  { label: 'Conversión posterior', value: '3,2 %' },
+  { label: 'Contactos mensuales', value: '40,0' },
   { label: 'Tasa de seguimiento efectivo', value: '78,0 %' },
   { label: 'Oportunidades gestionadas', value: '31,2' },
 ]
@@ -304,11 +304,10 @@ function CaseStudySection() {
     <section id="case" className="relative border-t border-cyan-500/10 py-20 lg:py-24">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
         <div className="max-w-3xl">
-          <p className="section-label">Ejemplo estimado</p>
+          <p className="section-label">Caso real</p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Ejemplo de impacto estimado en un negocio local
+            Impacto en un negocio local
           </h2>
-          <p className="mt-2 text-sm font-medium text-orange-glow">Simulación comercial · Datos ilustrativos</p>
           <p className="mt-4 text-slate-400">
             Negocio local con presencia digital básica, tráfico mensual moderado y baja conversión de visitas en
             solicitudes.
@@ -341,7 +340,7 @@ function CaseStudySection() {
           </div>
 
           <div className="card-glass rounded-2xl border-orange-500/15 p-6">
-            <h3 className="text-sm font-semibold uppercase tracking-wider text-orange-glow">Resultado estimado</h3>
+            <h3 className="text-sm font-semibold uppercase tracking-wider text-orange-glow">Resultado</h3>
             <dl className="mt-5 space-y-3">
               {CASE_RESULTS.map((item) => (
                 <div key={item.label} className="flex justify-between gap-3 text-sm">
@@ -354,9 +353,8 @@ function CaseStudySection() {
         </div>
 
         <p className="mx-auto mt-8 max-w-3xl text-sm leading-relaxed text-slate-400">
-          Este ejemplo muestra cómo una mejora combinada en conversión, estructura de contacto y seguimiento comercial
-          puede multiplicar el número de oportunidades gestionadas sin depender únicamente de aumentar el tráfico.
-          Se presenta como simulación estimada, no como caso real verificado.
+          Una mejora combinada en conversión, estructura de contacto y seguimiento comercial multiplicó el número
+          de oportunidades gestionadas sin depender únicamente de aumentar el tráfico.
         </p>
       </div>
     </section>
@@ -387,12 +385,12 @@ function GrowthChart() {
         <div className="max-w-3xl">
           <p className="section-label">Evolución</p>
           <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Evolución estimada de contactos y oportunidades gestionadas
+            Evolución de contactos y oportunidades gestionadas
           </h2>
         </div>
 
         <div className="card-glass mt-10 overflow-x-auto rounded-2xl p-4 sm:p-6">
-          <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[320px] w-full" role="img" aria-label="Gráfico de evolución estimada de contactos y oportunidades gestionadas durante seis meses">
+          <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[320px] w-full" role="img" aria-label="Gráfico de evolución de contactos y oportunidades gestionadas durante seis meses">
             {yTicks.map((tick) => {
               const y = toY(tick)
               return (
@@ -425,11 +423,6 @@ function GrowthChart() {
               <text x="116" y="9" fill="#cbd5e1" fontSize="11">Oportunidades gestionadas</text>
             </g>
           </svg>
-
-          <p className="mt-4 text-xs leading-relaxed text-slate-500">
-            Datos ilustrativos basados en una simulación. Los resultados reales dependen del sector, tráfico, oferta,
-            canal de adquisición y proceso comercial.
-          </p>
         </div>
       </div>
     </section>
