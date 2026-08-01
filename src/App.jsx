@@ -66,12 +66,11 @@ const PROCESS_STEPS = [
   },
 ]
 
-const ROI_METRICS = [
-  { label: 'Conversión inicial', value: '1,4 %' },
-  { label: 'Conversión posterior', value: '3,2 %' },
-  { label: 'Incremento relativo', value: '+128,6 %' },
-  { label: 'Contactos mensuales', value: '18,7 → 42,8' },
-  { label: 'Oportunidades adicionales', value: '+24,1 / mes' },
+const ROI_SLIDERS = [
+  { key: 'team', label: 'Personas en el equipo', min: 1, max: 50, step: 1, default: 8, suffix: '' },
+  { key: 'hours', label: 'Horas/semana en tareas repetitivas (por persona)', min: 1, max: 40, step: 1, default: 8, suffix: ' h' },
+  { key: 'cost', label: 'Coste medio por hora', min: 10, max: 100, step: 1, default: 18, suffix: ' €' },
+  { key: 'leads', label: 'Leads/consultas al mes', min: 10, max: 500, step: 5, default: 120, suffix: '' },
 ]
 
 const CASE_BEFORE = [
@@ -95,15 +94,6 @@ const CASE_RESULTS = [
   { label: 'Mejora de seguimiento', value: '+36,0 pp' },
 ]
 
-const CHART_DATA = [
-  { month: 'Mes 1', contacts: 17.5, opportunities: 7.4 },
-  { month: 'Mes 2', contacts: 21.8, opportunities: 10.9 },
-  { month: 'Mes 3', contacts: 27.6, opportunities: 16.4 },
-  { month: 'Mes 4', contacts: 33.2, opportunities: 22.1 },
-  { month: 'Mes 5', contacts: 37.9, opportunities: 27.8 },
-  { month: 'Mes 6', contacts: 40.0, opportunities: 31.2 },
-]
-
 const GOAL_OPTIONS = [
   'Mejorar captación de clientes',
   'Aumentar conversión web',
@@ -113,9 +103,6 @@ const GOAL_OPTIONS = [
   'Analizar reputación online',
 ]
 
-function formatDecimal(value) {
-  return value.toLocaleString('es-ES', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
-}
 
 function Logo({ className = '' }) {
   return (
@@ -258,40 +245,116 @@ function ServicesSection() {
   )
 }
 
+function formatCurrency(value) {
+  return `${Math.round(value).toLocaleString('es-ES')} €`
+}
+
 function ROISection() {
+  const [params, setParams] = useState({
+    team: 8,
+    hours: 8,
+    cost: 18,
+    leads: 120,
+  })
+
+  const monthlyHours = Math.round(params.team * params.hours * 4.33)
+  const yearlyLoss = monthlyHours * params.cost * 12
+  const potentialSavings = Math.round(yearlyLoss * 0.7)
+  const recoveredHours = Math.round(monthlyHours * 0.7)
+  const savingsPercent = yearlyLoss > 0 ? Math.round((potentialSavings / yearlyLoss) * 100) : 0
+
+  const updateParam = (key, value) => {
+    setParams((prev) => ({ ...prev, [key]: Number(value) }))
+  }
+
   return (
     <section id="roi" className="relative py-20 lg:py-24">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="grid gap-10 lg:grid-cols-2 lg:items-start">
-          <div>
-            <p className="section-label">Retorno de inversión</p>
-            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-              ROI basado en conversión, seguimiento y medición
-            </h2>
-            <p className="mt-4 text-slate-400">
-              El retorno no depende únicamente de aumentar el tráfico. En muchos negocios, una mejora moderada en
-              la conversión y en el seguimiento de oportunidades puede generar un impacto significativo en el volumen
-              de contactos cualificados y solicitudes comerciales.
-            </p>
-            <div className="mt-8 rounded-xl border border-cyan-500/15 bg-navy-800/40 p-5">
-              <p className="text-xs font-medium uppercase tracking-wider text-slate-500">Fórmula orientativa</p>
-              <p className="mt-3 font-display text-sm leading-relaxed text-slate-200 sm:text-base">
-                ROI comercial estimado = incremento de oportunidades × valor medio estimado por cliente − inversión
-              </p>
-            </div>
-          </div>
+        <div className="max-w-3xl">
+          <p className="section-label">Retorno de inversión</p>
+          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            ROI basado en conversión, seguimiento y medición
+          </h2>
+          <p className="mt-4 text-slate-400">
+            Mueve los controles con los datos de tu empresa. Lo calculamos al instante.
+          </p>
+        </div>
 
-          <div className="card-glass rounded-2xl p-6">
-            <p className="text-xs font-medium uppercase tracking-wider text-cyan-glow">Indicadores de ejemplo estimado</p>
-            <dl className="mt-6 space-y-4">
-              {ROI_METRICS.map((metric) => (
-                <div key={metric.label} className="flex items-baseline justify-between gap-4 border-b border-cyan-500/10 pb-4 last:border-0 last:pb-0">
-                  <dt className="text-sm text-slate-400">{metric.label}</dt>
-                  <dd className="font-display text-lg font-semibold text-white">{metric.value}</dd>
+        <div className="card-glass mt-10 overflow-hidden rounded-2xl">
+          <div className="grid lg:grid-cols-2">
+            <div className="border-b border-cyan-500/10 p-6 sm:p-8 lg:border-b-0 lg:border-r">
+              <h3 className="font-display text-lg font-semibold text-white">Tu situación actual</h3>
+              <p className="mt-1 text-xs text-slate-500">Estimación orientativa. Sin compromiso.</p>
+
+              <div className="mt-8 space-y-7">
+                {ROI_SLIDERS.map((slider) => (
+                  <div key={slider.key}>
+                    <div className="mb-3 flex items-end justify-between gap-4">
+                      <label htmlFor={`roi-${slider.key}`} className="text-sm text-slate-400">
+                        {slider.label}
+                      </label>
+                      <span className="shrink-0 font-display text-lg font-semibold text-cyan-glow">
+                        {params[slider.key]}{slider.suffix}
+                      </span>
+                    </div>
+                    <input
+                      id={`roi-${slider.key}`}
+                      type="range"
+                      min={slider.min}
+                      max={slider.max}
+                      step={slider.step}
+                      value={params[slider.key]}
+                      onChange={(e) => updateParam(slider.key, e.target.value)}
+                      className="roi-slider"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex flex-col justify-between p-6 sm:p-8">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+                  Estás perdiendo cada año
+                </p>
+                <p className="mt-2 font-display text-4xl font-bold text-rose-400 sm:text-5xl">
+                  {formatCurrency(yearlyLoss)}
+                  <span className="text-2xl font-semibold text-rose-400/80">/año</span>
+                </p>
+                <p className="mt-3 text-sm text-slate-400">
+                  {monthlyHours.toLocaleString('es-ES')} horas al mes en trabajo que puede automatizar un sistema.
+                </p>
+                <p className="mt-2 text-xs text-slate-500">
+                  {params.leads.toLocaleString('es-ES')} consultas mensuales requieren seguimiento estructurado.
+                </p>
+              </div>
+
+              <div className="mt-8 rounded-xl border border-cyan-500/10 bg-navy-900/60 p-5">
+                <p className="text-sm font-medium text-white">Ahorro potencial automatizando</p>
+                <p className="mt-2 font-display text-3xl font-bold text-cyan-glow">
+                  {formatCurrency(potentialSavings)}
+                </p>
+                <div className="mt-4 h-2 overflow-hidden rounded-full bg-navy-700">
+                  <div
+                    className="h-full rounded-full bg-gradient-to-r from-cyan-500 to-orange-500 transition-all duration-300"
+                    style={{ width: `${savingsPercent}%` }}
+                  />
                 </div>
-              ))}
-            </dl>
-            <p className="mt-6 text-xs text-slate-500">Datos ilustrativos. No constituyen una promesa de resultados.</p>
+                <p className="mt-4 text-sm text-slate-400">
+                  Recuperas{' '}
+                  <span className="font-semibold text-white">{recoveredHours.toLocaleString('es-ES')} h/mes</span>{' '}
+                  para vender y atender mejor.
+                </p>
+              </div>
+
+              <a
+                href="#contact"
+                className="btn-primary mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl px-8 py-4 text-sm font-semibold text-navy-950"
+              >
+                Quiero recuperar ese dinero
+                <span aria-hidden="true">→</span>
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -356,74 +419,6 @@ function CaseStudySection() {
           Una mejora combinada en conversión, estructura de contacto y seguimiento comercial multiplicó el número
           de oportunidades gestionadas sin depender únicamente de aumentar el tráfico.
         </p>
-      </div>
-    </section>
-  )
-}
-
-function GrowthChart() {
-  const width = 640
-  const height = 300
-  const pad = { top: 24, right: 24, bottom: 48, left: 52 }
-  const chartW = width - pad.left - pad.right
-  const chartH = height - pad.top - pad.bottom
-  const maxY = 45
-
-  const xStep = chartW / (CHART_DATA.length - 1)
-
-  const toX = (index) => pad.left + index * xStep
-  const toY = (value) => pad.top + chartH - (value / maxY) * chartH
-
-  const contactsPath = CHART_DATA.map((d, i) => `${i === 0 ? 'M' : 'L'} ${toX(i)} ${toY(d.contacts)}`).join(' ')
-  const opportunitiesPath = CHART_DATA.map((d, i) => `${i === 0 ? 'M' : 'L'} ${toX(i)} ${toY(d.opportunities)}`).join(' ')
-
-  const yTicks = [0, 15, 30, 45]
-
-  return (
-    <section className="relative py-20 lg:py-24">
-      <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="max-w-3xl">
-          <p className="section-label">Evolución</p>
-          <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            Evolución de contactos y oportunidades gestionadas
-          </h2>
-        </div>
-
-        <div className="card-glass mt-10 overflow-x-auto rounded-2xl p-4 sm:p-6">
-          <svg viewBox={`0 0 ${width} ${height}`} className="min-w-[320px] w-full" role="img" aria-label="Gráfico de evolución de contactos y oportunidades gestionadas durante seis meses">
-            {yTicks.map((tick) => {
-              const y = toY(tick)
-              return (
-                <g key={tick}>
-                  <line x1={pad.left} y1={y} x2={width - pad.right} y2={y} stroke="rgba(34,211,238,0.08)" strokeDasharray="4 4" />
-                  <text x={pad.left - 10} y={y + 4} textAnchor="end" fill="#64748b" fontSize="11">
-                    {formatDecimal(tick)}
-                  </text>
-                </g>
-              )
-            })}
-
-            <path d={contactsPath} fill="none" stroke="#22d3ee" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-            <path d={opportunitiesPath} fill="none" stroke="#fb923c" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-
-            {CHART_DATA.map((d, i) => (
-              <g key={d.month}>
-                <circle cx={toX(i)} cy={toY(d.contacts)} r="4" fill="#22d3ee" />
-                <circle cx={toX(i)} cy={toY(d.opportunities)} r="4" fill="#fb923c" />
-                <text x={toX(i)} y={height - 16} textAnchor="middle" fill="#94a3b8" fontSize="11">
-                  {d.month}
-                </text>
-              </g>
-            ))}
-
-            <g transform={`translate(${pad.left}, ${pad.top - 4})`}>
-              <rect x="0" y="0" width="10" height="10" fill="#22d3ee" rx="2" />
-              <text x="16" y="9" fill="#cbd5e1" fontSize="11">Contactos</text>
-              <rect x="100" y="0" width="10" height="10" fill="#fb923c" rx="2" />
-              <text x="116" y="9" fill="#cbd5e1" fontSize="11">Oportunidades gestionadas</text>
-            </g>
-          </svg>
-        </div>
       </div>
     </section>
   )
@@ -618,7 +613,6 @@ function App() {
         <ServicesSection />
         <ROISection />
         <CaseStudySection />
-        <GrowthChart />
         <ProcessSection />
         <ContactSection />
       </main>
