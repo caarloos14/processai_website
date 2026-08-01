@@ -497,14 +497,71 @@ function ProcessSection() {
 }
 
 function CTASection() {
+  const [form, setForm] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    subject: '',
+  })
+  const [status, setStatus] = useState('idle')
+
+  const handleChange = (event) => {
+    const { name, value } = event.target
+    setForm((prev) => ({ ...prev, [name]: value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    setStatus('sending')
+
+    const formData = new FormData()
+    formData.append('name', form.name.trim())
+    formData.append('email', form.email.trim())
+    formData.append('phone', form.phone.trim())
+    formData.append(
+      'message',
+      form.subject.trim()
+        ? `Asunto: ${form.subject.trim()}\n\nTeléfono: ${form.phone.trim()}`
+        : `Teléfono: ${form.phone.trim()}`,
+    )
+    formData.append(
+      '_subject',
+      form.subject.trim()
+        ? `[ProcessAI Studio] ${form.subject.trim()}`
+        : '[ProcessAI Studio] Nueva consulta desde la web',
+    )
+    formData.append('_captcha', 'false')
+    formData.append('_template', 'table')
+
+    try {
+      const response = await fetch('https://formsubmit.co/ajax/processaistudio@gmail.com', {
+        method: 'POST',
+        headers: { Accept: 'application/json' },
+        body: formData,
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        setStatus('success')
+        setForm({ name: '', phone: '', email: '', subject: '' })
+        return
+      }
+
+      setStatus('error')
+    } catch {
+      setStatus('error')
+    }
+  }
+
   return (
     <section id="contact" className="relative py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-6 lg:px-8">
-        <div className="relative overflow-hidden rounded-3xl border border-cyan-500/15 bg-gradient-to-br from-navy-800/80 via-navy-900/90 to-navy-950 p-10 text-center sm:p-16">
+        <div className="relative overflow-hidden rounded-3xl border border-cyan-500/15 bg-gradient-to-br from-navy-800/80 via-navy-900/90 to-navy-950 p-8 sm:p-12 lg:p-16">
           <div className="glow-orb -left-20 -top-20 h-64 w-64 bg-cyan-500/20" />
           <div className="glow-orb -bottom-20 -right-20 h-64 w-64 bg-orange-500/15" />
 
-          <div className="relative">
+          <div className="relative mx-auto max-w-3xl text-center">
             <p className="section-label">Hablemos</p>
             <h2 className="mt-3 font-display text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
               ¿Quieres un sistema diseñado en torno a{' '}
@@ -515,27 +572,129 @@ function CTASection() {
               sin paquetes cerrados, solo la solución que encaja contigo.
             </p>
 
-            <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <a
-                href="mailto:processaistudio@gmail.com"
-                className="btn-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-navy-950 sm:w-auto"
+            <form
+              onSubmit={handleSubmit}
+              className="card-glass mx-auto mt-10 max-w-2xl rounded-2xl border border-cyan-500/10 p-6 text-left sm:p-8"
+            >
+              <div className="grid gap-5 sm:grid-cols-2">
+                <div>
+                  <label htmlFor="contact-name" className="form-label">
+                    Nombre <span className="form-required">*</span>
+                  </label>
+                  <input
+                    id="contact-name"
+                    name="name"
+                    type="text"
+                    required
+                    autoComplete="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    placeholder="Tu nombre"
+                    className="form-input"
+                  />
+                </div>
+
+                <div>
+                  <label htmlFor="contact-phone" className="form-label">
+                    Teléfono <span className="form-required">*</span>
+                  </label>
+                  <input
+                    id="contact-phone"
+                    name="phone"
+                    type="tel"
+                    required
+                    autoComplete="tel"
+                    value={form.phone}
+                    onChange={handleChange}
+                    placeholder="+34 600 000 000"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="contact-email" className="form-label">
+                    Correo electrónico <span className="form-required">*</span>
+                  </label>
+                  <input
+                    id="contact-email"
+                    name="email"
+                    type="email"
+                    required
+                    autoComplete="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="tu@empresa.com"
+                    className="form-input"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <label htmlFor="contact-subject" className="form-label">
+                    Asunto <span className="text-slate-500">(opcional)</span>
+                  </label>
+                  <textarea
+                    id="contact-subject"
+                    name="subject"
+                    rows={4}
+                    value={form.subject}
+                    onChange={handleChange}
+                    placeholder="¿En qué podemos ayudarte?"
+                    className="form-input form-textarea min-h-[120px] resize-y"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={status === 'sending'}
+                className="btn-primary mt-6 inline-flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-navy-950 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-                processaistudio@gmail.com
-              </a>
-              <a
-                href="https://instagram.com/processai.studio"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl px-8 py-3.5 text-sm font-semibold text-slate-200 sm:w-auto"
-              >
-                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                </svg>
-                Escríbenos por Instagram
-              </a>
+                {status === 'sending' ? 'Enviando…' : 'Enviar solicitud'}
+                {status !== 'sending' && (
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                  </svg>
+                )}
+              </button>
+
+              {status === 'success' && (
+                <p className="mt-4 rounded-lg border border-cyan-500/20 bg-cyan-500/10 px-4 py-3 text-center text-sm text-cyan-glow">
+                  ¡Mensaje enviado! Te responderemos en breve.
+                </p>
+              )}
+
+              {status === 'error' && (
+                <p className="mt-4 rounded-lg border border-orange-500/20 bg-orange-500/10 px-4 py-3 text-center text-sm text-orange-glow">
+                  No se pudo enviar el mensaje. Inténtalo de nuevo o contáctanos directamente abajo.
+                </p>
+              )}
+            </form>
+
+            <div className="mt-10 border-t border-cyan-500/10 pt-8">
+              <p className="text-sm text-slate-500">O contáctanos directamente</p>
+              <div className="mt-4 flex flex-col items-center justify-center gap-3 sm:flex-row sm:gap-6">
+                <a
+                  href="mailto:processaistudio@gmail.com"
+                  className="inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-cyan-glow"
+                >
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  processaistudio@gmail.com
+                </a>
+                <span className="hidden text-slate-700 sm:inline">·</span>
+                <a
+                  href="https://instagram.com/processai.studio"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-cyan-glow"
+                >
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                  </svg>
+                  @processai.studio
+                </a>
+              </div>
             </div>
           </div>
         </div>
